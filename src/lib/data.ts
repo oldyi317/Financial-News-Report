@@ -129,6 +129,24 @@ export function getArticlesByStock(
 }
 
 /**
+ * Get all articles across all dates, with date attached.
+ */
+export function getAllArticles(): { date: string; article: Article }[] {
+  const dates = getAvailableDates();
+  const results: { date: string; article: Article }[] = [];
+
+  for (const date of dates) {
+    const data = getDailyArticles(date);
+    if (!data) continue;
+    for (const article of data.articles) {
+      results.push({ date, article });
+    }
+  }
+
+  return results;
+}
+
+/**
  * Get all unique stock codes from all data.
  */
 export function getAllStockCodes(): string[] {

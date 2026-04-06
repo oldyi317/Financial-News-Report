@@ -19,9 +19,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const category = slugToCategory[slug];
   if (!category) return { title: "分類不存在" };
+  const description = `最新${category}類財經新聞整理與摘要`;
   return {
-    title: `${category} — 每日財經新聞`,
-    description: `${category}類財經新聞`,
+    title: `${category}新聞`,
+    description,
+    openGraph: {
+      title: `${category}新聞 — 每日財經新聞`,
+      description,
+    },
   };
 }
 

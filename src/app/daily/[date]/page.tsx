@@ -10,9 +10,18 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ date: string }> }) {
   const { date } = await params;
+  const summary = getDailySummary(date);
+  const description = summary?.overview
+    ? summary.overview.slice(0, 160)
+    : `${date} 台股財經新聞摘要`;
   return {
-    title: `${date} — 每日財經新聞`,
-    description: `${date} 台股財經新聞摘要`,
+    title: `${date} 財經新聞報告`,
+    description,
+    openGraph: {
+      title: `${date} 財經新聞報告`,
+      description,
+      type: "article",
+    },
   };
 }
 

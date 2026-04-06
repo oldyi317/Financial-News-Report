@@ -9,8 +9,14 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
+  const description = `股票代號 ${code} 的相關財經新聞整理`;
   return {
-    title: `${code} 相關新聞 — 每日財經新聞`,
+    title: `${code} 相關新聞`,
+    description,
+    openGraph: {
+      title: `${code} 相關新聞 — 每日財經新聞`,
+      description,
+    },
   };
 }
 
