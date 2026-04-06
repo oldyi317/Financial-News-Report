@@ -8,8 +8,9 @@ import {
   getMarketData,
 } from "@/lib/data";
 
-export function generateStaticParams() {
-  return getAvailableMonths().map((m) => ({ month: m }));
+export async function generateStaticParams() {
+  const months = await getAvailableMonths();
+  return months.map((m) => ({ month: m }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ month: string }> }) {
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ month: st
 
 export default async function MonthlyPage({ params }: { params: Promise<{ month: string }> }) {
   const { month } = await params;
-  const dates = getMonthDates(month);
+  const dates = await getMonthDates(month);
 
   if (dates.length === 0) {
     notFound();
@@ -37,8 +38,10 @@ export default async function MonthlyPage({ params }: { params: Promise<{ month:
   const marketData: { date: string; close: number; change: number }[] = [];
 
   for (const date of dates) {
-    const articles = getDailyArticles(date);
-    const market = getMarketData(date);
+    const [articles, market] = await Promise.all([
+      getDailyArticles(date),
+      getMarketData(date),
+    ]);
     const count = articles?.articles.length ?? 0;
     totalArticles += count;
 
@@ -68,7 +71,6 @@ export default async function MonthlyPage({ params }: { params: Promise<{ month:
         共 {dates.length} 個交易日，{totalArticles} 篇新聞
       </p>
 
-      {/* Month stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         {lastClose && (
           <div className="bg-surface border border-border rounded-lg p-3 text-center">
@@ -94,7 +96,6 @@ export default async function MonthlyPage({ params }: { params: Promise<{ month:
         </div>
       </div>
 
-      {/* Category breakdown */}
       <section className="mb-8">
         <h2 className="text-xl font-bold mb-3">分類統計</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -109,12 +110,11 @@ export default async function MonthlyPage({ params }: { params: Promise<{ month:
         </div>
       </section>
 
-      {/* Daily list */}
       <section>
         <h2 className="text-xl font-bold mb-4">每日一覽</h2>
         <div className="space-y-2">
-          {dates.map((date) => {
-            const summary = getDailySummary(date);
+          {await Promise.all(dates.map(async (date) => {
+            const summary = await getDailySummary(date);
             const m = marketData.find((d) => d.date === date);
             return (
               <Link
@@ -133,7 +133,7 @@ export default async function MonthlyPage({ params }: { params: Promise<{ month:
                 </div>
               </Link>
             );
-          })}
+          }))}
         </div>
       </section>
     </main>

@@ -1,6 +1,7 @@
 import { getAvailableDates, getDailyArticles, getDailySummary } from "@/lib/data";
 
 export const dynamic = "force-static";
+export const revalidate = 3600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://financial-news-report.vercel.app";
 
@@ -13,13 +14,13 @@ function escapeXml(str: string): string {
     .replace(/'/g, "&apos;");
 }
 
-export function GET() {
-  const dates = getAvailableDates().slice(0, 30);
+export async function GET() {
+  const dates = (await getAvailableDates()).slice(0, 30);
 
-  const items = dates
-    .map((date) => {
-      const summary = getDailySummary(date);
-      const articlesData = getDailyArticles(date);
+  const items = await Promise.all(
+    dates.map(async (date) => {
+      const summary = await getDailySummary(date);
+      const articlesData = await getDailyArticles(date);
       const articleCount = articlesData?.articles.length ?? 0;
       const description = summary?.overview
         ? escapeXml(summary.overview)
@@ -33,7 +34,7 @@ export function GET() {
       <description>${description}</description>
     </item>`;
     })
-    .join("\n");
+  );
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -43,7 +44,7 @@ export function GET() {
     <description>AI 驅動的每日台股財經新聞自動整理</description>
     <language>zh-TW</language>
     <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>
-${items}
+${items.join("\n")}
   </channel>
 </rss>`;
 

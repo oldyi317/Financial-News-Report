@@ -148,34 +148,35 @@ def fetch_top_movers(limit=20):
 
 
 # ------------------------------------------------------------------
-# 3. Save
+# 3. Save to Supabase
 # ------------------------------------------------------------------
 
 def save_market_data(date_str=None):
-    """Save market data to data/YYYY/MM/DD/market.json."""
+    """Save market data to Supabase."""
+    from db import get_client
+
     if date_str is None:
         now = _now_tw()
-        date_str = now.strftime("%Y/%m/%d")
+        date_str = now.strftime("%Y-%m-%d")
 
     taiex = fetch_taiex()
     top_movers = fetch_top_movers()
 
-    market = {
-        "date": date_str.replace("/", "-"),
-        "taiex": taiex,
-        "topMovers": top_movers,
+    supabase = get_client()
+
+    row = {
+        "date": date_str,
+        "taiex_close": taiex["close"],
+        "taiex_change": taiex["change"],
+        "taiex_change_percent": taiex["changePercent"],
+        "taiex_volume": int(taiex["volume"]),
+        "top_movers": json.dumps(top_movers, ensure_ascii=False),
     }
 
-    parts = date_str.split("/")
-    out_dir = PROJECT_ROOT / "data" / parts[0] / parts[1] / parts[2]
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "market.json"
+    supabase.table("market_data").upsert(row, on_conflict="date").execute()
 
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(market, f, ensure_ascii=False, indent=2)
-
-    print(f"\nSaved market data -> {out_path}")
-    return str(out_path)
+    print(f"\nSaved market data to Supabase (date: {date_str})")
+    return date_str
 
 
 # ------------------------------------------------------------------
@@ -188,8 +189,8 @@ def main():
     print(f"Time (TW): {_now_tw().isoformat()}")
     print("=" * 60 + "\n")
 
-    path = save_market_data()
-    print(f"\nDone. Output: {path}")
+    date_str = save_market_data()
+    print(f"\nDone. Date: {date_str}")
 
 
 if __name__ == "__main__":

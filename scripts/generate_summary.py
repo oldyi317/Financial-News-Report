@@ -61,23 +61,32 @@ def _parse_json_response(text):
 
 
 def load_articles(date_str):
-    """Load articles.json for a given date.
+    """Load articles from Supabase for a given date.
 
     Args:
         date_str: Date string in YYYY-MM-DD format.
 
     Returns:
-        List of article dicts, or empty list if file not found.
+        List of article dicts, or empty list if none found.
     """
-    parts = date_str.split("-")
-    path = PROJECT_ROOT / "data" / parts[0] / parts[1] / parts[2] / "articles.json"
-    if not path.exists():
-        print(f"No articles found at {path}")
-        return []
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    print(f"Loaded {len(data)} articles from {path}")
-    return data
+    from db import get_client
+
+    supabase = get_client()
+    result = supabase.table("articles").select("*").eq("date", date_str).execute()
+    articles = []
+    for row in result.data:
+        articles.append({
+            "id": row["id"],
+            "title": row["title"],
+            "source": row["source"],
+            "sourceUrl": row["source_url"],
+            "category": row.get("category", ""),
+            "stocks": row.get("stocks", []),
+            "summary": row.get("summary", ""),
+            "publishedAt": row["published_at"],
+        })
+    print(f"Loaded {len(articles)} articles from Supabase")
+    return articles
 
 
 def categorize_articles(client, articles):
@@ -206,6 +215,8 @@ def main():
     print("Starting article categorization...")
     enrichments = categorize_articles(client, articles)
 
+    from db import get_client
+
     enrichment_map = {e["id"]: e for e in enrichments}
     for article in articles:
         aid = article["id"]
@@ -214,27 +225,29 @@ def main():
             article["stocks"] = enrichment_map[aid].get("stocks", [])
             article["summary"] = enrichment_map[aid].get("summary", "")
 
-    # Save updated articles.json
-    parts = date_str.split("-")
-    data_dir = PROJECT_ROOT / "data" / parts[0] / parts[1] / parts[2]
-    data_dir.mkdir(parents=True, exist_ok=True)
-
-    articles_path = data_dir / "articles.json"
-    with open(articles_path, "w", encoding="utf-8") as f:
-        json.dump(articles, f, ensure_ascii=False, indent=2)
-    print(f"Updated articles saved to {articles_path}")
+    # Update articles in Supabase with enriched data
+    supabase = get_client()
+    for article in articles:
+        supabase.table("articles").update({
+            "category": article["category"],
+            "stocks": article["stocks"],
+            "summary": article["summary"],
+        }).eq("id", article["id"]).execute()
+    print(f"Updated {len(articles)} articles in Supabase")
 
     # Generate daily summary
     print("Generating daily summary...")
     summary = generate_daily_summary(client, articles)
-    summary["date"] = date_str
-    summary["generatedAt"] = _now_tw().isoformat()
-    summary["articleCount"] = len(articles)
 
-    summary_path = data_dir / "summary.json"
-    with open(summary_path, "w", encoding="utf-8") as f:
-        json.dump(summary, f, ensure_ascii=False, indent=2)
-    print(f"Daily summary saved to {summary_path}")
+    summary_row = {
+        "date": date_str,
+        "overview": summary.get("overview", ""),
+        "highlights": summary.get("highlights", []),
+        "category_summaries": json.dumps(summary.get("categorySummaries", {}), ensure_ascii=False),
+    }
+
+    supabase.table("daily_summaries").upsert(summary_row, on_conflict="date").execute()
+    print(f"Daily summary saved to Supabase")
 
 
 if __name__ == "__main__":

@@ -8,8 +8,9 @@ import {
   getMarketData,
 } from "@/lib/data";
 
-export function generateStaticParams() {
-  return getAvailableWeeks().map((w) => ({ week: w.start }));
+export async function generateStaticParams() {
+  const weeks = await getAvailableWeeks();
+  return weeks.map((w) => ({ week: w.start }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ week: string }> }) {
@@ -26,21 +27,22 @@ export async function generateMetadata({ params }: { params: Promise<{ week: str
 
 export default async function WeeklyPage({ params }: { params: Promise<{ week: string }> }) {
   const { week } = await params;
-  const dates = getWeekDates(week);
+  const dates = await getWeekDates(week);
 
   if (dates.length === 0) {
     notFound();
   }
 
-  // Aggregate stats
   let totalArticles = 0;
   const categoryCounts: Record<string, number> = {};
   const dailyData: { date: string; overview: string; articleCount: number; marketClose?: number; marketChange?: number }[] = [];
 
   for (const date of dates) {
-    const summary = getDailySummary(date);
-    const articles = getDailyArticles(date);
-    const market = getMarketData(date);
+    const [summary, articles, market] = await Promise.all([
+      getDailySummary(date),
+      getDailyArticles(date),
+      getMarketData(date),
+    ]);
     const count = articles?.articles.length ?? 0;
     totalArticles += count;
 
@@ -66,7 +68,6 @@ export default async function WeeklyPage({ params }: { params: Promise<{ week: s
         共 {dates.length} 個交易日，{totalArticles} 篇新聞
       </p>
 
-      {/* Category breakdown */}
       <section className="mb-8">
         <h2 className="text-xl font-bold mb-3">分類統計</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -81,7 +82,6 @@ export default async function WeeklyPage({ params }: { params: Promise<{ week: s
         </div>
       </section>
 
-      {/* Daily summaries */}
       <section>
         <h2 className="text-xl font-bold mb-4">每日摘要</h2>
         <div className="space-y-4">

@@ -4,13 +4,14 @@ import DailySummaryComponent from "@/components/DailySummary";
 import MarketIndicators from "@/components/MarketIndicators";
 import CategoryTabs from "@/components/CategoryTabs";
 
-export function generateStaticParams() {
-  return getAvailableDates().map((date) => ({ date }));
+export async function generateStaticParams() {
+  const dates = await getAvailableDates();
+  return dates.map((date) => ({ date }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ date: string }> }) {
   const { date } = await params;
-  const summary = getDailySummary(date);
+  const summary = await getDailySummary(date);
   const description = summary?.overview
     ? summary.overview.slice(0, 160)
     : `${date} 台股財經新聞摘要`;
@@ -27,9 +28,11 @@ export async function generateMetadata({ params }: { params: Promise<{ date: str
 
 export default async function DailyReportPage({ params }: { params: Promise<{ date: string }> }) {
   const { date } = await params;
-  const summary = getDailySummary(date);
-  const market = getMarketData(date);
-  const articlesData = getDailyArticles(date);
+  const [summary, market, articlesData] = await Promise.all([
+    getDailySummary(date),
+    getMarketData(date),
+    getDailyArticles(date),
+  ]);
 
   if (!summary && !articlesData) {
     notFound();

@@ -204,22 +204,38 @@ def collect_all():
 
 
 # ------------------------------------------------------------------
-# 5. Save
+# 5. Save to Supabase
 # ------------------------------------------------------------------
 
 def save_articles(articles, date_str=None):
-    """Save articles to data/YYYY/MM/DD/articles.json."""
+    """Save articles to Supabase."""
+    from db import get_client
+
     if date_str is None:
         now = _now_tw()
-        date_str = now.strftime("%Y/%m/%d")
-    parts = date_str.split("/")
-    out_dir = PROJECT_ROOT / "data" / parts[0] / parts[1] / parts[2]
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "articles.json"
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(articles, f, ensure_ascii=False, indent=2)
-    print(f"\nSaved {len(articles)} articles -> {out_path}")
-    return str(out_path)
+        date_str = now.strftime("%Y-%m-%d")
+
+    supabase = get_client()
+
+    rows = []
+    for art in articles:
+        rows.append({
+            "id": art["id"],
+            "date": date_str,
+            "title": art["title"],
+            "source": art["source"],
+            "source_url": art["sourceUrl"],
+            "category": art.get("category", ""),
+            "stocks": art.get("stocks", []),
+            "summary": art.get("summary", ""),
+            "published_at": art["publishedAt"],
+        })
+
+    if rows:
+        supabase.table("articles").upsert(rows, on_conflict="id").execute()
+
+    print(f"\nSaved {len(rows)} articles to Supabase (date: {date_str})")
+    return date_str
 
 
 # ------------------------------------------------------------------
@@ -233,8 +249,8 @@ def main():
     print("=" * 60 + "\n")
 
     articles = collect_all()
-    path = save_articles(articles)
-    print(f"\nDone. Output: {path}")
+    date_str = save_articles(articles)
+    print(f"\nDone. Date: {date_str}")
 
 
 if __name__ == "__main__":

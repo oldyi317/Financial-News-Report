@@ -6,9 +6,6 @@ on:
     - cron: "0 0 * * 1-5"
   workflow_dispatch: # Allow manual trigger
 
-permissions:
-  contents: write
-
 jobs:
   update-news:
     runs-on: ubuntu-latest
@@ -28,21 +25,20 @@ jobs:
         run: pip install -r scripts/requirements.txt
 
       - name: Collect news
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python scripts/collect_news.py
 
       - name: Fetch market data
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python scripts/fetch_market_data.py
 
       - name: Generate AI summary
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python scripts/generate_summary.py
-
-      - name: Commit and push data
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          DATE=$(TZ='Asia/Taipei' date +%Y-%m-%d)
-          git add data/
-          git diff --cached --quiet || git commit -m "chore: daily news update ${DATE}"
-          git push

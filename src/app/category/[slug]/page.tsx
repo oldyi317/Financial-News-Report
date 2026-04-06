@@ -38,7 +38,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     notFound();
   }
 
-  const date = getLatestDate();
+  const date = await getLatestDate();
 
   if (!date) {
     return (
@@ -49,7 +49,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     );
   }
 
-  const articlesData = getDailyArticles(date);
+  const articlesData = await getDailyArticles(date);
   const articles = (articlesData?.articles ?? []).filter(
     (a) => a.category === category
   );

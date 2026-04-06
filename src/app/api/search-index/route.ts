@@ -1,9 +1,10 @@
 import { getAllArticles } from "@/lib/data";
 
 export const dynamic = "force-static";
+export const revalidate = 3600;
 
-export function GET() {
-  const allArticles = getAllArticles();
+export async function GET() {
+  const allArticles = await getAllArticles();
 
   const index = allArticles.map(({ date, article }) => ({
     id: article.id,

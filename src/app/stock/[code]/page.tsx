@@ -2,15 +2,14 @@ import { notFound } from "next/navigation";
 import { getAllStockCodes, getArticlesByStock, getStockNameMap } from "@/lib/data";
 import ArticleCard from "@/components/ArticleCard";
 
-const stockNames = getStockNameMap();
-
-export function generateStaticParams() {
-  const codes = getAllStockCodes();
+export async function generateStaticParams() {
+  const codes = await getAllStockCodes();
   return codes.map((code) => ({ code }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
+  const stockNames = await getStockNameMap();
   const name = stockNames[code];
   const label = name ? `${code} ${name}` : code;
   const description = `${label} 的相關財經新聞整理`;
@@ -27,7 +26,10 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
 export default async function StockPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
 
-  const results = getArticlesByStock(code);
+  const [results, stockNames] = await Promise.all([
+    getArticlesByStock(code),
+    getStockNameMap(),
+  ]);
 
   if (results.length === 0) {
     notFound();

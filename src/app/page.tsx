@@ -14,6 +14,8 @@ import StockBadge from "@/components/StockBadge";
 import TaiexChart from "@/components/TaiexChart";
 import type { Article } from "@/lib/types";
 
+export const revalidate = 3600; // ISR: revalidate every hour
+
 function getHotStocks(articles: Article[]): { code: string; count: number }[] {
   const counts: Record<string, number> = {};
   for (const article of articles) {
@@ -27,8 +29,8 @@ function getHotStocks(articles: Article[]): { code: string; count: number }[] {
     .slice(0, 5);
 }
 
-export default function Home() {
-  const date = getLatestDate();
+export default async function Home() {
+  const date = await getLatestDate();
 
   if (!date) {
     return (
@@ -39,11 +41,14 @@ export default function Home() {
     );
   }
 
-  const summary = getDailySummary(date);
-  const market = getMarketData(date);
-  const articlesData = getDailyArticles(date);
-  const historicalMarket = getHistoricalMarketData();
-  const stockNames = getStockNameMap();
+  const [summary, market, articlesData, historicalMarket, stockNames] = await Promise.all([
+    getDailySummary(date),
+    getMarketData(date),
+    getDailyArticles(date),
+    getHistoricalMarketData(),
+    getStockNameMap(),
+  ]);
+
   const articles = articlesData?.articles ?? [];
   const hotStocks = getHotStocks(articles);
 
