@@ -24,16 +24,26 @@ RSS_SOURCES = {
     "鉅亨網": [
         "https://news.cnyes.com/news/cat/tw_stock/rss",
         "https://news.cnyes.com/news/cat/wd_stock/rss",
+        "https://news.cnyes.com/news/cat/fund/rss",
     ],
     "經濟日報": [
         "https://money.udn.com/rssfeed/news/1001/5710",
         "https://money.udn.com/rssfeed/news/1001/5607",
+        "https://money.udn.com/rssfeed/news/1001/12017",
     ],
     "MoneyDJ": [
         "https://www.moneydj.com/rss/rsscontent.aspx?svc=NW&fno=1",
+        "https://www.moneydj.com/rss/rsscontent.aspx?svc=NW&fno=4",
+    ],
+    "工商時報": [
+        "https://ctee.com.tw/feed",
+    ],
+    "自由財經": [
+        "https://ec.ltn.com.tw/rss",
     ],
     "Google News": [
         "https://news.google.com/rss/search?q=台股+when:1d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant",
+        "https://news.google.com/rss/search?q=台灣+經濟+when:1d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant",
     ],
 }
 

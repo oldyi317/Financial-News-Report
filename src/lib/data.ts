@@ -129,6 +129,21 @@ export function getArticlesByStock(
 }
 
 /**
+ * Get historical market data across all available dates (newest first).
+ */
+export function getHistoricalMarketData(): MarketData[] {
+  const dates = getAvailableDates();
+  const results: MarketData[] = [];
+
+  for (const date of dates) {
+    const market = getMarketData(date);
+    if (market) results.push(market);
+  }
+
+  return results;
+}
+
+/**
  * Get all articles across all dates, with date attached.
  */
 export function getAllArticles(): { date: string; article: Article }[] {
@@ -144,6 +159,93 @@ export function getAllArticles(): { date: string; article: Article }[] {
   }
 
   return results;
+}
+
+/**
+ * Get dates within a week (Mon-Sun) containing the given date.
+ */
+export function getWeekDates(dateStr: string): string[] {
+  const d = new Date(dateStr + "T00:00:00+08:00");
+  const day = d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - ((day + 6) % 7));
+
+  const available = new Set(getAvailableDates());
+  const dates: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const cur = new Date(monday);
+    cur.setDate(monday.getDate() + i);
+    const str = cur.toISOString().slice(0, 10);
+    if (available.has(str)) dates.push(str);
+  }
+  return dates;
+}
+
+/**
+ * Get dates within a month (YYYY-MM) that have data.
+ */
+export function getMonthDates(yearMonth: string): string[] {
+  const available = getAvailableDates();
+  return available.filter((d) => d.startsWith(yearMonth));
+}
+
+/**
+ * Get available weeks as [startDate, endDate] pairs.
+ */
+export function getAvailableWeeks(): { label: string; start: string; end: string }[] {
+  const dates = getAvailableDates();
+  if (dates.length === 0) return [];
+
+  const weekMap = new Map<string, string[]>();
+  for (const dateStr of dates) {
+    const d = new Date(dateStr + "T00:00:00+08:00");
+    const day = d.getDay();
+    const monday = new Date(d);
+    monday.setDate(d.getDate() - ((day + 6) % 7));
+    const key = monday.toISOString().slice(0, 10);
+    if (!weekMap.has(key)) weekMap.set(key, []);
+    weekMap.get(key)!.push(dateStr);
+  }
+
+  return Array.from(weekMap.entries())
+    .map(([start, days]) => ({
+      label: `${start} ~ ${days[days.length - 1]}`,
+      start,
+      end: days[days.length - 1],
+    }))
+    .sort((a, b) => b.start.localeCompare(a.start));
+}
+
+/**
+ * Get available months as YYYY-MM strings.
+ */
+export function getAvailableMonths(): string[] {
+  const dates = getAvailableDates();
+  const months = new Set<string>();
+  for (const d of dates) {
+    months.add(d.slice(0, 7));
+  }
+  return Array.from(months).sort().reverse();
+}
+
+/**
+ * Build a map of stock code → name from all market data.
+ */
+export function getStockNameMap(): Record<string, string> {
+  const dates = getAvailableDates();
+  const map: Record<string, string> = {};
+
+  for (const date of dates) {
+    const market = getMarketData(date);
+    if (!market) continue;
+    for (const mover of market.topMovers) {
+      if (mover.code && mover.name) {
+        map[mover.code] = mover.name;
+      }
+    }
+  }
+
+  return map;
 }
 
 /**

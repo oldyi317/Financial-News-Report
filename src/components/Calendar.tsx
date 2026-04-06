@@ -53,14 +53,14 @@ export default function Calendar({ availableDates }: CalendarProps) {
   return (
     <div className="bg-surface border border-border rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <button onClick={prevMonth} className="text-gray-400 hover:text-white transition-colors px-2">←</button>
+        <button onClick={prevMonth} className="text-text-secondary hover:text-text-primary transition-colors px-2">←</button>
         <h3 className="text-lg font-bold">{year} {monthNames[month]}</h3>
-        <button onClick={nextMonth} className="text-gray-400 hover:text-white transition-colors px-2">→</button>
+        <button onClick={nextMonth} className="text-text-secondary hover:text-text-primary transition-colors px-2">→</button>
       </div>
 
       <div className="grid grid-cols-7 gap-1 text-center text-sm">
         {["日","一","二","三","四","五","六"].map((d) => (
-          <div key={d} className="text-gray-500 py-1 font-medium">{d}</div>
+          <div key={d} className="text-text-muted py-1 font-medium">{d}</div>
         ))}
 
         {weeks.flat().map((day, i) => {
@@ -78,7 +78,7 @@ export default function Calendar({ availableDates }: CalendarProps) {
             );
           }
 
-          return <div key={`day-${i}`} className="py-2 text-gray-600">{day}</div>;
+          return <div key={`day-${i}`} className="py-2 text-text-muted">{day}</div>;
         })}
       </div>
     </div>

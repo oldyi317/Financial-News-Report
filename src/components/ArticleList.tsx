@@ -3,7 +3,7 @@ import ArticleCard from "./ArticleCard";
 
 export default function ArticleList({ articles }: { articles: Article[] }) {
   if (articles.length === 0) {
-    return <p className="text-gray-500 text-center py-8">暫無新聞</p>;
+    return <p className="text-text-muted text-center py-8">暫無新聞</p>;
   }
 
   return (

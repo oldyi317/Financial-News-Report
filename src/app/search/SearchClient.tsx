@@ -56,14 +56,14 @@ export default function SearchClient() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="輸入關鍵字搜尋（標題、摘要、股票代號）"
-        className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
+        className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-text-primary placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
         autoFocus
       />
 
-      {loading && <p className="text-gray-500 mt-4">載入搜尋索引中...</p>}
+      {loading && <p className="text-text-muted mt-4">載入搜尋索引中...</p>}
 
       {!loading && query.trim() && (
-        <p className="text-gray-500 text-sm mt-3 mb-4">
+        <p className="text-text-muted text-sm mt-3 mb-4">
           找到 {results.length} 筆結果{results.length === 50 ? "（僅顯示前 50 筆）" : ""}
         </p>
       )}
@@ -77,17 +77,17 @@ export default function SearchClient() {
             <div className="flex items-center gap-2 mb-2">
               <Link
                 href={`/daily/${item.date}`}
-                className="text-xs text-gray-500 hover:text-primary transition-colors"
+                className="text-xs text-text-muted hover:text-primary transition-colors"
               >
                 {item.date}
               </Link>
-              <span className={`text-xs ${categoryColors[item.category] ?? "text-gray-400"}`}>
+              <span className={`text-xs ${categoryColors[item.category] ?? "text-text-secondary"}`}>
                 {item.category}
               </span>
-              <span className="text-xs text-gray-600">{item.source}</span>
+              <span className="text-xs text-text-muted">{item.source}</span>
             </div>
-            <h3 className="font-bold text-white mb-1">{item.title}</h3>
-            <p className="text-sm text-gray-400">{item.summary}</p>
+            <h3 className="font-bold text-text-primary mb-1">{item.title}</h3>
+            <p className="text-sm text-text-secondary">{item.summary}</p>
             {item.stocks.length > 0 && (
               <div className="flex gap-1 mt-2">
                 {item.stocks.map((code) => (

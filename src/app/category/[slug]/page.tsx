@@ -44,7 +44,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     return (
       <main className="max-w-4xl mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold">{category}</h1>
-        <p className="text-gray-400 mt-4">尚無新聞資料</p>
+        <p className="text-text-secondary mt-4">尚無新聞資料</p>
       </main>
     );
   }
@@ -57,7 +57,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-2">{category}</h1>
-      <p className="text-gray-500 mb-6">{date}</p>
+      <p className="text-text-muted mb-6">{date}</p>
       <ArticleList articles={articles} />
     </main>
   );

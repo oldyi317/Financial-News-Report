@@ -23,7 +23,7 @@ export default function CategoryTabs({ articles }: { articles: Article[] }) {
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
               activeTab === cat
                 ? "bg-primary text-white"
-                : "bg-surface text-gray-400 border border-border hover:text-white"
+                : "bg-surface text-text-secondary border border-border hover:text-text-primary"
             }`}
           >
             {cat}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_TC } from "next/font/google";
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
 const notoSansTC = Noto_Sans_TC({
@@ -44,20 +45,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-TW" className="dark">
+    <html lang="zh-TW" className="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            var t = localStorage.getItem('theme');
+            var d = t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.classList.toggle('dark', d);
+          })();
+        `}} />
+      </head>
       <body
-        className={`${notoSansTC.variable} font-sans bg-background text-white min-h-screen`}
+        className={`${notoSansTC.variable} font-sans bg-background text-text-primary min-h-screen`}
       >
         <nav className="border-b border-border">
           <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-            <Link href="/" className="text-lg font-bold text-primary">
+            <Link href="/" className="text-base md:text-lg font-bold text-primary whitespace-nowrap">
               📊 每日財經新聞
             </Link>
-            <div className="flex gap-4 text-sm text-gray-400">
-              <Link href="/" className="hover:text-white transition-colors">首頁</Link>
-              <Link href="/search" className="hover:text-white transition-colors">搜尋</Link>
-              <Link href="/archive" className="hover:text-white transition-colors">歷史</Link>
-              <a href="/feed.xml" className="hover:text-white transition-colors" title="RSS 訂閱">RSS</a>
+            <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-text-secondary">
+              <Link href="/" className="hover:text-text-primary transition-colors">首頁</Link>
+              <Link href="/search" className="hover:text-text-primary transition-colors">搜尋</Link>
+              <Link href="/archive" className="hover:text-text-primary transition-colors">歷史</Link>
+              <a href="/feed.xml" className="hover:text-text-primary transition-colors" title="RSS 訂閱">RSS</a>
+              <ThemeToggle />
             </div>
           </div>
         </nav>

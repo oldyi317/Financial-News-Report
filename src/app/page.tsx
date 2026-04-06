@@ -4,11 +4,14 @@ import {
   getDailySummary,
   getMarketData,
   getDailyArticles,
+  getHistoricalMarketData,
+  getStockNameMap,
 } from "@/lib/data";
 import DailySummaryComponent from "@/components/DailySummary";
 import MarketIndicators from "@/components/MarketIndicators";
 import CategoryTabs from "@/components/CategoryTabs";
 import StockBadge from "@/components/StockBadge";
+import TaiexChart from "@/components/TaiexChart";
 import type { Article } from "@/lib/types";
 
 function getHotStocks(articles: Article[]): { code: string; count: number }[] {
@@ -31,7 +34,7 @@ export default function Home() {
     return (
       <main className="max-w-4xl mx-auto px-4 py-12 text-center">
         <h1 className="text-3xl font-bold">📊 每日財經新聞</h1>
-        <p className="text-gray-400 mt-4">尚無新聞資料</p>
+        <p className="text-text-secondary mt-4">尚無新聞資料</p>
       </main>
     );
   }
@@ -39,14 +42,16 @@ export default function Home() {
   const summary = getDailySummary(date);
   const market = getMarketData(date);
   const articlesData = getDailyArticles(date);
+  const historicalMarket = getHistoricalMarketData();
+  const stockNames = getStockNameMap();
   const articles = articlesData?.articles ?? [];
   const hotStocks = getHotStocks(articles);
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
       <header className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-primary">📊 每日財經新聞</h1>
-        <p className="text-gray-500 mt-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-primary">📊 每日財經新聞</h1>
+        <p className="text-text-muted mt-2">
           <Link href={`/daily/${date}`} className="hover:text-primary transition-colors">
             {date} →
           </Link>
@@ -55,6 +60,7 @@ export default function Home() {
 
       {summary && <DailySummaryComponent summary={summary} />}
       {market && <MarketIndicators market={market} />}
+      {historicalMarket.length >= 2 && <TaiexChart data={historicalMarket} />}
 
       <h2 className="text-xl font-bold mb-4">分類新聞</h2>
       <CategoryTabs articles={articles} />
@@ -66,15 +72,16 @@ export default function Home() {
             {hotStocks.map(({ code, count }) => (
               <div key={code} className="bg-surface border border-border rounded-lg px-4 py-2 flex items-center gap-2">
                 <StockBadge code={code} />
-                <span className="text-xs text-gray-500">{count} 則新聞</span>
+                {stockNames[code] && <span className="text-xs text-text-secondary">{stockNames[code]}</span>}
+                <span className="text-xs text-text-muted">{count} 則新聞</span>
               </div>
             ))}
           </div>
         </section>
       )}
 
-      <footer className="text-center text-xs text-gray-600 py-8 border-t border-border mt-8">
-        <p>資料來源：鉅亨網、經濟日報、Yahoo 奇摩股市、MoneyDJ</p>
+      <footer className="text-center text-xs text-text-muted py-8 border-t border-border mt-8">
+        <p>資料來源：鉅亨網、經濟日報、Yahoo 奇摩股市、MoneyDJ、工商時報、自由財經</p>
         <p className="mt-1">最後更新：{date}</p>
       </footer>
     </main>

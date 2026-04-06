@@ -24,17 +24,17 @@ export default function MarketIndicators({ market }: { market: MarketData }) {
     <section className="mb-8">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-surface rounded-lg p-4 border border-border">
-          <div className="text-sm text-gray-500 mb-1">加權指數</div>
+          <div className="text-sm text-text-muted mb-1">加權指數</div>
           <div className="text-xl font-bold">{market.taiex.close.toLocaleString()}</div>
           <ChangeText change={market.taiex.change} changePercent={market.taiex.changePercent} />
         </div>
         <div className="bg-surface rounded-lg p-4 border border-border">
-          <div className="text-sm text-gray-500 mb-1">成交量</div>
+          <div className="text-sm text-text-muted mb-1">成交量</div>
           <div className="text-xl font-bold">{formatVolume(market.taiex.volume)}</div>
         </div>
         {market.topMovers.slice(0, 2).map((stock) => (
           <div key={stock.code} className="bg-surface rounded-lg p-4 border border-border">
-            <div className="text-sm text-gray-500 mb-1">{stock.code} {stock.name}</div>
+            <div className="text-sm text-text-muted mb-1">{stock.code} {stock.name}</div>
             <div className="text-xl font-bold">{stock.close}</div>
             <ChangeText change={stock.change} changePercent={stock.changePercent} />
           </div>
