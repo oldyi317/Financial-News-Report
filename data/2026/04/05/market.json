@@ -1,0 +1,10 @@
+{
+  "date": "2026-04-05",
+  "taiex": { "close": 22000, "change": 80, "changePercent": 0.36, "volume": 298000000000 },
+  "topMovers": [
+    { "code": "2330", "name": "台積電", "close": 875, "change": 5, "changePercent": 0.57 },
+    { "code": "2454", "name": "聯發科", "close": 1220, "change": 15, "changePercent": 1.24 },
+    { "code": "3481", "name": "群創", "close": 18.5, "change": 1.68, "changePercent": 10.0 },
+    { "code": "2409", "name": "友達", "close": 21.3, "change": 1.2, "changePercent": 5.97 }
+  ]
+}
