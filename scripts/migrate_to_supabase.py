@@ -69,9 +69,7 @@ def migrate():
                         "date": date_str,
                         "overview": summary.get("overview", ""),
                         "highlights": summary.get("highlights", []),
-                        "category_summaries": json.dumps(
-                            summary.get("categorySummaries", {}), ensure_ascii=False
-                        ),
+                        "category_summaries": summary.get("categorySummaries", {}),
                     }
                     supabase.table("daily_summaries").upsert(row, on_conflict="date").execute()
                     print(f"  Summary: migrated")

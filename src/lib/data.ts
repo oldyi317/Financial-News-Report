@@ -5,50 +5,52 @@ import type { Article, ArticlesData, DailySummary, MarketData } from "./types";
 // Cache layer — fetch once per build, reuse across pages
 // ============================================================
 
-let cachedDates: string[] | null = null;
 let cachedArticles: Map<string, Article[]> | null = null;
 let cachedSummaries: Map<string, DailySummary> | null = null;
 let cachedMarket: Map<string, MarketData> | null = null;
 
-async function fetchAllDates(): Promise<string[]> {
-  if (cachedDates) return cachedDates;
+async function fetchPaginated<T>(table: string, orderBy: string, ascending = false): Promise<T[]> {
+  const PAGE_SIZE = 1000;
+  const all: T[] = [];
+  let offset = 0;
 
-  const { data } = await supabase
-    .from("articles")
-    .select("date")
-    .order("date", { ascending: false });
+  while (true) {
+    const { data } = await supabase
+      .from(table)
+      .select("*")
+      .order(orderBy, { ascending })
+      .range(offset, offset + PAGE_SIZE - 1);
 
-  const dateSet = new Set<string>();
-  for (const row of data ?? []) {
-    dateSet.add(row.date);
+    if (!data || data.length === 0) break;
+    all.push(...(data as T[]));
+    if (data.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
   }
-  cachedDates = Array.from(dateSet).sort().reverse();
-  return cachedDates;
+
+  return all;
 }
 
 async function fetchAllArticles(): Promise<Map<string, Article[]>> {
   if (cachedArticles) return cachedArticles;
 
-  const { data } = await supabase
-    .from("articles")
-    .select("*")
-    .order("published_at", { ascending: false });
+  const rows = await fetchPaginated<Record<string, unknown>>("articles", "published_at");
 
   const map = new Map<string, Article[]>();
-  for (const row of data ?? []) {
+  for (const row of rows) {
     const article: Article = {
-      id: row.id,
-      title: row.title,
-      source: row.source,
-      sourceUrl: row.source_url,
-      category: row.category || "台股",
-      stocks: row.stocks || [],
-      summary: row.summary || "",
-      publishedAt: row.published_at,
+      id: row.id as string,
+      title: row.title as string,
+      source: row.source as string,
+      sourceUrl: row.source_url as string,
+      category: (row.category || "台股") as Article["category"],
+      stocks: (row.stocks as string[]) || [],
+      summary: (row.summary as string) || "",
+      publishedAt: row.published_at as string,
     };
-    const existing = map.get(row.date) ?? [];
+    const date = row.date as string;
+    const existing = map.get(date) ?? [];
     existing.push(article);
-    map.set(row.date, existing);
+    map.set(date, existing);
   }
   cachedArticles = map;
   return cachedArticles;
@@ -57,21 +59,15 @@ async function fetchAllArticles(): Promise<Map<string, Article[]>> {
 async function fetchAllSummaries(): Promise<Map<string, DailySummary>> {
   if (cachedSummaries) return cachedSummaries;
 
-  const { data } = await supabase
-    .from("daily_summaries")
-    .select("*")
-    .order("date", { ascending: false });
+  const rows = await fetchPaginated<Record<string, unknown>>("daily_summaries", "date");
 
   const map = new Map<string, DailySummary>();
-  for (const row of data ?? []) {
-    const catSummaries = typeof row.category_summaries === "string"
-      ? JSON.parse(row.category_summaries)
-      : row.category_summaries ?? {};
-    map.set(row.date, {
-      date: row.date,
-      overview: row.overview,
-      highlights: row.highlights || [],
-      categorySummaries: catSummaries,
+  for (const row of rows) {
+    map.set(row.date as string, {
+      date: row.date as string,
+      overview: row.overview as string,
+      highlights: (row.highlights as string[]) || [],
+      categorySummaries: (row.category_summaries as Record<string, string>) ?? {},
     });
   }
   cachedSummaries = map;
@@ -81,18 +77,15 @@ async function fetchAllSummaries(): Promise<Map<string, DailySummary>> {
 async function fetchAllMarket(): Promise<Map<string, MarketData>> {
   if (cachedMarket) return cachedMarket;
 
-  const { data } = await supabase
-    .from("market_data")
-    .select("*")
-    .order("date", { ascending: false });
+  const rows = await fetchPaginated<Record<string, unknown>>("market_data", "date");
 
   const map = new Map<string, MarketData>();
-  for (const row of data ?? []) {
+  for (const row of rows) {
     const topMovers = typeof row.top_movers === "string"
       ? JSON.parse(row.top_movers)
       : row.top_movers ?? [];
-    map.set(row.date, {
-      date: row.date,
+    map.set(row.date as string, {
+      date: row.date as string,
       taiex: {
         close: Number(row.taiex_close),
         change: Number(row.taiex_change),
@@ -111,11 +104,12 @@ async function fetchAllMarket(): Promise<Map<string, MarketData>> {
 // ============================================================
 
 export async function getAvailableDates(): Promise<string[]> {
-  return fetchAllDates();
+  const map = await fetchAllArticles();
+  return Array.from(map.keys()).sort().reverse();
 }
 
 export async function getLatestDate(): Promise<string | null> {
-  const dates = await fetchAllDates();
+  const dates = await getAvailableDates();
   return dates.length > 0 ? dates[0] : null;
 }
 

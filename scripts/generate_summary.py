@@ -5,13 +5,12 @@ import json
 import os
 import re
 from datetime import datetime, timezone, timedelta
-from pathlib import Path
 
 import anthropic
 
-TW_TZ = timezone(timedelta(hours=8))
+from db import get_client
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+TW_TZ = timezone(timedelta(hours=8))
 
 MODEL = "claude-haiku-4-5-20251001"
 
@@ -69,8 +68,6 @@ def load_articles(date_str):
     Returns:
         List of article dicts, or empty list if none found.
     """
-    from db import get_client
-
     supabase = get_client()
     result = supabase.table("articles").select("*").eq("date", date_str).execute()
     articles = []
@@ -215,8 +212,6 @@ def main():
     print("Starting article categorization...")
     enrichments = categorize_articles(client, articles)
 
-    from db import get_client
-
     enrichment_map = {e["id"]: e for e in enrichments}
     for article in articles:
         aid = article["id"]
@@ -225,14 +220,24 @@ def main():
             article["stocks"] = enrichment_map[aid].get("stocks", [])
             article["summary"] = enrichment_map[aid].get("summary", "")
 
-    # Update articles in Supabase with enriched data
+    # Batch update articles in Supabase with enriched data
     supabase = get_client()
-    for article in articles:
-        supabase.table("articles").update({
-            "category": article["category"],
-            "stocks": article["stocks"],
-            "summary": article["summary"],
-        }).eq("id", article["id"]).execute()
+    update_rows = [
+        {
+            "id": art["id"],
+            "date": date_str,
+            "title": art["title"],
+            "source": art["source"],
+            "source_url": art["sourceUrl"],
+            "category": art["category"],
+            "stocks": art["stocks"],
+            "summary": art["summary"],
+            "published_at": art["publishedAt"],
+        }
+        for art in articles
+    ]
+    if update_rows:
+        supabase.table("articles").upsert(update_rows, on_conflict="id").execute()
     print(f"Updated {len(articles)} articles in Supabase")
 
     # Generate daily summary
@@ -243,7 +248,7 @@ def main():
         "date": date_str,
         "overview": summary.get("overview", ""),
         "highlights": summary.get("highlights", []),
-        "category_summaries": json.dumps(summary.get("categorySummaries", {}), ensure_ascii=False),
+        "category_summaries": summary.get("categorySummaries", {}),
     }
 
     supabase.table("daily_summaries").upsert(summary_row, on_conflict="date").execute()
