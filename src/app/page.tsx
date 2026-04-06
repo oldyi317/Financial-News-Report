@@ -35,7 +35,7 @@ export default async function Home() {
   if (!date) {
     return (
       <main className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <h1 className="text-3xl font-bold">📊 每日財經新聞</h1>
+        <h1 className="text-3xl font-bold">每日財經新聞</h1>
         <p className="text-text-secondary mt-4">尚無新聞資料</p>
       </main>
     );
@@ -55,10 +55,10 @@ export default async function Home() {
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
       <header className="text-center mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-primary">📊 每日財經新聞</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-primary">每日財經新聞</h1>
         <p className="text-text-muted mt-2">
           <Link href={`/daily/${date}`} className="hover:text-primary transition-colors">
-            {date} →
+            {date}
           </Link>
         </p>
       </header>

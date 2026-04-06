@@ -27,7 +27,7 @@ export default async function ArchivePage() {
                 <Link
                   key={w.start}
                   href={`/weekly/${w.start}`}
-                  className="block bg-surface border border-border rounded-lg px-4 py-2 hover:border-primary/50 transition-colors text-sm"
+                  className="cursor-pointer block bg-surface border border-border rounded-lg px-4 py-2 hover:border-primary/50 hover:bg-surface-hover transition-all duration-150 text-sm"
                 >
                   <span className="text-primary">{w.label}</span>
                 </Link>
@@ -44,7 +44,7 @@ export default async function ArchivePage() {
                 <Link
                   key={m}
                   href={`/monthly/${m}`}
-                  className="block bg-surface border border-border rounded-lg px-4 py-2 hover:border-primary/50 transition-colors text-sm"
+                  className="cursor-pointer block bg-surface border border-border rounded-lg px-4 py-2 hover:border-primary/50 hover:bg-surface-hover transition-all duration-150 text-sm"
                 >
                   <span className="text-primary">{m}</span>
                 </Link>

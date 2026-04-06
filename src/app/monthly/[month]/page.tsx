@@ -126,7 +126,7 @@ export default async function MonthlyPage({ params }: { params: Promise<{ month:
                 <div className="flex items-center gap-3 text-sm">
                   {m && (
                     <span className={m.change >= 0 ? "text-green-400" : "text-red-400"}>
-                      {m.close.toLocaleString()} {m.change >= 0 ? "▲" : "▼"}{Math.abs(m.change).toFixed(0)}
+                      {m.close.toLocaleString()} {m.change >= 0 ? "+" : "-"}{Math.abs(m.change).toFixed(0)}
                     </span>
                   )}
                   {summary && <span className="text-text-muted hidden md:inline max-w-xs truncate">{summary.overview?.slice(0, 50)}</span>}

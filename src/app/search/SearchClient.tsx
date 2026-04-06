@@ -43,10 +43,10 @@ export default function SearchClient() {
   }, [query, items]);
 
   const categoryColors: Record<string, string> = {
-    "台股": "text-blue-400",
-    "國際": "text-green-400",
-    "產業": "text-yellow-400",
-    "政策": "text-purple-400",
+    "台股": "text-cat-tw-stock",
+    "國際": "text-cat-intl",
+    "產業": "text-cat-industry",
+    "政策": "text-cat-policy",
   };
 
   return (
@@ -60,7 +60,20 @@ export default function SearchClient() {
         autoFocus
       />
 
-      {loading && <p className="text-text-muted mt-4">載入搜尋索引中...</p>}
+      {loading && (
+        <div className="space-y-3 mt-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-surface border border-border rounded-lg p-4 animate-pulse">
+              <div className="flex gap-2 mb-2">
+                <div className="h-3 w-20 bg-surface-hover rounded" />
+                <div className="h-3 w-12 bg-surface-hover rounded" />
+              </div>
+              <div className="h-4 w-3/4 bg-surface-hover rounded mb-2" />
+              <div className="h-3 w-full bg-surface-hover rounded" />
+            </div>
+          ))}
+        </div>
+      )}
 
       {!loading && query.trim() && (
         <p className="text-text-muted text-sm mt-3 mb-4">
@@ -72,7 +85,7 @@ export default function SearchClient() {
         {results.map((item) => (
           <article
             key={`${item.date}-${item.id}`}
-            className="bg-surface border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
+            className="bg-surface border border-border rounded-lg p-4 hover:border-primary/50 hover:bg-surface-hover transition-all duration-150"
           >
             <div className="flex items-center gap-2 mb-2">
               <Link

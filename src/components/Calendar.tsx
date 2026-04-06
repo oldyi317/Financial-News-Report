@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CalendarProps {
   availableDates: string[];
@@ -53,9 +54,13 @@ export default function Calendar({ availableDates }: CalendarProps) {
   return (
     <div className="bg-surface border border-border rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <button onClick={prevMonth} className="text-text-secondary hover:text-text-primary transition-colors px-2">←</button>
+        <button onClick={prevMonth} className="cursor-pointer text-text-secondary hover:text-text-primary transition-colors p-1 rounded-md">
+          <ChevronLeft size={18} />
+        </button>
         <h3 className="text-lg font-bold">{year} {monthNames[month]}</h3>
-        <button onClick={nextMonth} className="text-text-secondary hover:text-text-primary transition-colors px-2">→</button>
+        <button onClick={nextMonth} className="cursor-pointer text-text-secondary hover:text-text-primary transition-colors p-1 rounded-md">
+          <ChevronRight size={18} />
+        </button>
       </div>
 
       <div className="grid grid-cols-7 gap-1 text-center text-sm">
@@ -72,7 +77,7 @@ export default function Calendar({ availableDates }: CalendarProps) {
           if (hasData) {
             return (
               <Link key={dateStr} href={`/daily/${dateStr}`}
-                className="py-2 rounded-lg bg-primary/20 text-primary font-medium hover:bg-primary/40 transition-colors">
+                className="cursor-pointer py-2 rounded-lg bg-primary/20 text-primary font-medium hover:bg-primary/40 transition-colors">
                 {day}
               </Link>
             );

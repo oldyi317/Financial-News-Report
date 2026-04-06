@@ -8,7 +8,7 @@ function formatTime(dateStr: string): string {
 
 export default function ArticleCard({ article }: { article: Article }) {
   return (
-    <article className="bg-surface border border-border rounded-lg p-4 hover:border-primary/50 transition-colors">
+    <article className="cursor-pointer bg-surface border border-border rounded-lg p-4 hover:border-primary/50 hover:bg-surface-hover transition-all duration-150">
       <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" className="block">
         <h3 className="font-bold text-text-primary hover:text-primary transition-colors mb-2">
           {article.title}

@@ -61,14 +61,12 @@ export default function TaiexChart({ data }: TaiexChartProps) {
           ))}
 
           {/* Area fill */}
-          <path d={areaPath} fill={isUp ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)"} />
+          <path d={areaPath} fill={isUp ? "var(--color-positive-bg)" : "var(--color-negative-bg)"} />
 
-          {/* Line */}
-          <path d={linePath} fill="none" stroke={isUp ? "#22c55e" : "#ef4444"} strokeWidth="2" />
+          <path d={linePath} fill="none" stroke={isUp ? "var(--color-positive)" : "var(--color-negative)"} strokeWidth="2" />
 
-          {/* Data points */}
           {points.map((p) => (
-            <circle key={p.date} cx={p.x} cy={p.y} r="3" fill={isUp ? "#22c55e" : "#ef4444"} />
+            <circle key={p.date} cx={p.x} cy={p.y} r="3" fill={isUp ? "var(--color-positive)" : "var(--color-negative)"} />
           ))}
 
           {/* Date labels */}

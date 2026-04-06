@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Sun, Moon } from "lucide-react";
 
 export default function ThemeToggle() {
   const [dark, setDark] = useState(true);
@@ -26,11 +27,11 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="text-text-muted hover:text-text-primary transition-colors"
+      className="cursor-pointer text-text-muted hover:text-text-primary transition-colors p-1 rounded-md"
       title={dark ? "切換淺色模式" : "切換深色模式"}
       aria-label={dark ? "切換淺色模式" : "切換深色模式"}
     >
-      {dark ? "☀️" : "🌙"}
+      {dark ? <Sun size={16} /> : <Moon size={16} />}
     </button>
   );
 }

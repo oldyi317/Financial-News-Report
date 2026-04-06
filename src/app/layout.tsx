@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
-import { Noto_Sans_TC } from "next/font/google";
-import Link from "next/link";
-import ThemeToggle from "@/components/ThemeToggle";
+import { Noto_Sans_TC, IBM_Plex_Sans } from "next/font/google";
+import NavBar from "@/components/NavBar";
 import "./globals.css";
 
 const notoSansTC = Noto_Sans_TC({
   variable: "--font-noto-sans-tc",
   subsets: ["latin"],
   weight: ["400", "500", "700"],
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-ibm-plex",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://financial-news-report.vercel.app";
@@ -56,22 +62,9 @@ export default function RootLayout({
         `}} />
       </head>
       <body
-        className={`${notoSansTC.variable} font-sans bg-background text-text-primary min-h-screen`}
+        className={`${notoSansTC.variable} ${ibmPlexSans.variable} font-sans antialiased bg-background text-text-primary min-h-screen`}
       >
-        <nav className="border-b border-border">
-          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-            <Link href="/" className="text-base md:text-lg font-bold text-primary whitespace-nowrap">
-              📊 每日財經新聞
-            </Link>
-            <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-text-secondary">
-              <Link href="/" className="hover:text-text-primary transition-colors">首頁</Link>
-              <Link href="/search" className="hover:text-text-primary transition-colors">搜尋</Link>
-              <Link href="/archive" className="hover:text-text-primary transition-colors">歷史</Link>
-              <a href="/feed.xml" className="hover:text-text-primary transition-colors" title="RSS 訂閱">RSS</a>
-              <ThemeToggle />
-            </div>
-          </div>
-        </nav>
+        <NavBar />
         {children}
       </body>
     </html>

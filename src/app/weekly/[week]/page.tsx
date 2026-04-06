@@ -97,7 +97,7 @@ export default async function WeeklyPage({ params }: { params: Promise<{ week: s
                       {d.marketClose.toLocaleString()}
                       {d.marketChange != null && (
                         <span className={d.marketChange >= 0 ? " text-green-400" : " text-red-400"}>
-                          {" "}{d.marketChange >= 0 ? "▲" : "▼"}{Math.abs(d.marketChange).toFixed(0)}
+                          {" "}{d.marketChange >= 0 ? "+" : "-"}{Math.abs(d.marketChange).toFixed(0)}
                         </span>
                       )}
                     </span>
