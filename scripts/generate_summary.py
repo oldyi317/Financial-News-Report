@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Generate AI summaries for financial news using Claude API."""
+"""Generate AI summaries for financial news using Gemini API."""
 
 import json
 import os
 import re
 from datetime import datetime, timezone, timedelta
 
-import anthropic
+from google import genai
 
 from db import get_client
 
 TW_TZ = timezone(timedelta(hours=8))
 
-MODEL = "claude-haiku-4-5-20251001"
+MODEL = "gemini-2.5-flash"
 
 CATEGORIZE_PROMPT = """你是一位台灣財經新聞分類專家。請為以下新聞分類並提取資訊。
 
@@ -87,12 +87,12 @@ def load_articles(date_str):
 
 
 def categorize_articles(client, articles):
-    """Use Claude API to categorize articles and extract information.
+    """Use Gemini API to categorize articles and extract information.
 
     Processes articles in batches of 10.
 
     Args:
-        client: anthropic.Anthropic client instance.
+        client: google.genai.Client instance.
         articles: List of article dicts.
 
     Returns:
@@ -112,19 +112,11 @@ def categorize_articles(client, articles):
         )
 
         try:
-            response = client.messages.create(
+            response = client.models.generate_content(
                 model=MODEL,
-                max_tokens=4096,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": CATEGORIZE_PROMPT.format(
-                            articles_text=articles_text
-                        ),
-                    }
-                ],
+                contents=CATEGORIZE_PROMPT.format(articles_text=articles_text),
             )
-            parsed = _parse_json_response(response.content[0].text)
+            parsed = _parse_json_response(response.text)
             results.extend(parsed)
             print(f"  Successfully categorized {len(parsed)} articles.")
         except Exception as e:
@@ -143,10 +135,10 @@ def categorize_articles(client, articles):
 
 
 def generate_daily_summary(client, articles):
-    """Use Claude API to generate a daily financial summary.
+    """Use Gemini API to generate a daily financial summary.
 
     Args:
-        client: anthropic.Anthropic client instance.
+        client: google.genai.Client instance.
         articles: List of article dicts.
 
     Returns:
@@ -160,19 +152,11 @@ def generate_daily_summary(client, articles):
     )
 
     try:
-        response = client.messages.create(
+        response = client.models.generate_content(
             model=MODEL,
-            max_tokens=4096,
-            messages=[
-                {
-                    "role": "user",
-                    "content": DAILY_SUMMARY_PROMPT.format(
-                        articles_text=articles_text
-                    ),
-                }
-            ],
+            contents=DAILY_SUMMARY_PROMPT.format(articles_text=articles_text),
         )
-        result = _parse_json_response(response.content[0].text)
+        result = _parse_json_response(response.text)
         print("Daily summary generated successfully.")
         return result
     except Exception as e:
@@ -191,12 +175,12 @@ def generate_daily_summary(client, articles):
 
 def main():
     """Entry point: enrich articles and generate daily summary."""
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        print("Error: ANTHROPIC_API_KEY environment variable is not set.")
+        print("Error: GEMINI_API_KEY environment variable is not set.")
         return
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = genai.Client(api_key=api_key)
 
     today = _now_tw()
     date_str = today.strftime("%Y-%m-%d")
